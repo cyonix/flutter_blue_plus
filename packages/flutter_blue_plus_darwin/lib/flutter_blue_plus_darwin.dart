@@ -269,9 +269,22 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
     String method, [
     dynamic arguments,
   ]) async {
-    // initialize
-    await _initFlutterBluePlus();
+    if (_methodConfiguresFlutterBluePlus(method)) {
+      // invoke configuration method
+      return await _invokeMethodWithLogging<T>(method, arguments);
+    } else {
+      // initialize
+      _initFlutterBluePlus();
 
+      // invoke method
+      return await _invokeMethodWithLogging<T>(method, arguments);
+    }
+  }
+
+  Future<T?> _invokeMethodWithLogging<T>(
+    String method, [
+    dynamic arguments,
+  ]) async {
     // log args
     if (_logLevel == LogLevel.verbose) {
       var func = '<$method>';
@@ -405,6 +418,18 @@ final class FlutterBluePlusDarwin extends FlutterBluePlusPlatform {
           ),
         );
     }
+  }
+
+  bool _methodConfiguresFlutterBluePlus(
+    String method,
+  ) {
+    switch (method) {
+      case 'setLogLevel':
+      case 'setOptions':
+        return true;
+      default:
+        return false;
+    };
   }
 
   String _prettyPrint(
